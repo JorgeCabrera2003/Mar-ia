@@ -36,6 +36,14 @@ REPORTE_CONFIG: dict[str, dict] = {
         "titulo":   "Reporte de Pedidos Pendientes",
         "columnas": ["ID Pedido", "Tipo", "Estado", "Fecha"],
     },
+    "buscar_persona": {
+        "titulo":   "Resultado de Búsqueda de Persona",
+        "columnas": ["Cédula", "Nombre Completo", "Teléfono", "Correo", "Rol"],
+    },
+    "reporte_platillos": {
+        "titulo":   "Reporte de Menú (Platillos)",
+        "columnas": ["Producto", "Categoría", "Precio", "Personalizable"],
+    },
 }
 
 

@@ -110,6 +110,8 @@ INTENT_DISPATCHER: dict = {
     "reporte_clientes":             lambda p: connector.get_clientes(p),
     "reporte_empleados":            lambda p: connector.get_directorio_empleados(p),
     "reporte_pedidos_pendientes":   lambda p: connector.get_pedidos_pendientes(p),
+    "buscar_persona":               lambda p: connector.buscar_persona(p),
+    "reporte_platillos":            lambda p: connector.get_platillos(p),
 }
 
 
@@ -170,12 +172,18 @@ def clasificar(body: ClasificarRequest):
             datos_crudos = INTENT_DISPATCHER[intencion](params)
 
         # 3. Construir y retornar el contrato JSON
+        desc_periodo = params.descripcion
+        if intencion == "buscar_persona" and params.tiene_entidad_persona():
+            desc_periodo = f"Búsqueda por {params.descripcion_persona()}"
+        elif intencion == "reporte_platillos":
+            desc_periodo = params.descripcion_platillos()
+            
         reporte = construir_reporte(
             intencion    = intencion,
             confianza    = confianza,
             datos_crudos = datos_crudos,
             cedula       = body.cedula,
-            periodo      = params.descripcion,
+            periodo      = desc_periodo,
         )
         return JSONResponse(content=reporte, status_code=status.HTTP_200_OK)
 
