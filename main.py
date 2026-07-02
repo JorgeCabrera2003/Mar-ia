@@ -28,6 +28,7 @@ from ml_engine      import MarIaEngine
 from db_connector   import SICGOVConnector
 from report_builder import construir_reporte, construir_reporte_error
 from training_data  import obtener_X_y, listar_intenciones
+from param_extractor import extraer_params
 
 load_dotenv()
 
@@ -103,9 +104,12 @@ class ReentrenarRequest(BaseModel):
 # ─── Dispatcher: intención → consulta SQL ────────────────────────────────────
 
 INTENT_DISPATCHER: dict = {
-    "reporte_inventario_bajo":   connector.get_alertas_inventario,
-    "reporte_asistencia_diaria": connector.get_asistencia_diaria,
-    "reporte_reservas_hoy":      connector.get_reservas_hoy,
+    "reporte_inventario_bajo":      lambda p: connector.get_alertas_inventario(p),
+    "reporte_asistencia_diaria":    lambda p: connector.get_asistencia_diaria(p),
+    "reporte_reservas_hoy":         lambda p: connector.get_reservas_hoy(p),
+    "reporte_clientes":             lambda p: connector.get_clientes(p),
+    "reporte_empleados":            lambda p: connector.get_directorio_empleados(p),
+    "reporte_pedidos_pendientes":   lambda p: connector.get_pedidos_pendientes(p),
 }
 
 
@@ -157,10 +161,13 @@ def clasificar(body: ClasificarRequest):
 
         intencion, confianza = engine.predecir(body.mensaje)
 
-        # 2. Consultar BD según intención
+        # 1b. Extraer parámetros dinámicos del mensaje (fecha, rango, límite, estado)
+        params = extraer_params(body.mensaje)
+
+        # 2. Consultar BD según intención + parámetros
         datos_crudos: list[dict] = []
         if intencion and intencion in INTENT_DISPATCHER:
-            datos_crudos = INTENT_DISPATCHER[intencion]()
+            datos_crudos = INTENT_DISPATCHER[intencion](params)
 
         # 3. Construir y retornar el contrato JSON
         reporte = construir_reporte(
@@ -168,6 +175,7 @@ def clasificar(body: ClasificarRequest):
             confianza    = confianza,
             datos_crudos = datos_crudos,
             cedula       = body.cedula,
+            periodo      = params.descripcion,
         )
         return JSONResponse(content=reporte, status_code=status.HTTP_200_OK)
 

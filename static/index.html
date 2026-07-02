@@ -350,11 +350,12 @@
   <!-- Suggestion chips -->
   <div class="suggestions">
     <button class="chip" onclick="sendChip('dame el inventario bajo')">📦 Inventario bajo</button>
-    <button class="chip" onclick="sendChip('asistencia del personal hoy')">📋 Asistencia de hoy</button>
-    <button class="chip" onclick="sendChip('ver las reservaciones de hoy')">📅 Reservas de hoy</button>
+    <button class="chip" onclick="sendChip('asistencia de hoy')">📋 Asistencia de hoy</button>
+    <button class="chip" onclick="sendChip('reservas de hoy')">📅 Reservas de hoy</button>
     <button class="chip" onclick="sendChip('stock crítico de insumos')">⚠️ Stock crítico</button>
-    <button class="chip" onclick="sendChip('quiénes faltaron hoy')">👥 Ausentes hoy</button>
-    <button class="chip" onclick="sendChip('cuántas mesas reservadas')">🍽️ Mesas reservadas</button>
+    <button class="chip" onclick="sendChip('cuántos clientes hay registrados')">👥 Clientes</button>
+    <button class="chip" onclick="sendChip('directorio de empleados')">🧑‍💼 Empleados</button>
+    <button class="chip" onclick="sendChip('pedidos pendientes')">🍽️ Pedidos pendientes</button>
   </div>
 
   <!-- Chat area -->
@@ -539,7 +540,7 @@
       // Metadata footer
       if (data.metadata?.fecha) {
         inner += `<div class="bubble-meta" style="margin-top:10px;">
-          📅 ${data.metadata.fecha} · ${data.metadata.hora} · ${data.metadata.total_filas} registros
+          📅 ${data.metadata.periodo || data.metadata.fecha} · ${data.metadata.hora} · ${data.metadata.total_filas} registros
         </div>`;
       }
     }

@@ -6,7 +6,7 @@ de reportes de PHP. No lanza excepciones: ante cualquier valor
 inesperado, sustituye con un valor seguro por defecto.
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 # ─── Formateadores individuales ───────────────────────────────────────────────
@@ -15,6 +15,7 @@ def _formatear_valor(valor) -> str:
     """
     Convierte un valor de BD a string limpio:
     - None / vacío   → "—"
+    - timedelta      → hora en formato 12h (TIME de MySQL)
     - datetime       → "DD/MM/YYYY HH:MM AM/PM"
     - date           → "DD/MM/YYYY"
     - float          → 2 decimales
@@ -23,6 +24,13 @@ def _formatear_valor(valor) -> str:
     try:
         if valor is None:
             return "—"
+        if isinstance(valor, timedelta):
+            total_seg = int(valor.total_seconds())
+            horas, rem = divmod(total_seg, 3600)
+            minutos    = rem // 60
+            periodo    = "AM" if horas < 12 else "PM"
+            hora_12    = horas % 12 or 12
+            return f"{hora_12}:{minutos:02d} {periodo}"
         if isinstance(valor, datetime):
             return valor.strftime("%d/%m/%Y %I:%M %p")
         if isinstance(valor, date):
@@ -106,7 +114,7 @@ def limpiar_asistencia(filas: list[dict]) -> list[list]:
 def limpiar_reservas(filas: list[dict]) -> list[list]:
     """
     Transforma filas de reservaciones en lista de listas para el reporte.
-    Columnas: Cliente, Mesa, Área, Hora, Personas, Estado
+    Columnas: Cliente, Mesa, Área, Hora Inicio, Hora Fin, Estado
     """
     resultado = []
     for fila in filas:
@@ -116,7 +124,7 @@ def limpiar_reservas(filas: list[dict]) -> list[list]:
                 _formatear_valor(fila.get("numero_mesa")),
                 _formatear_valor(fila.get("area")),
                 _formatear_valor(fila.get("hora")),
-                _formatear_valor(fila.get("cantidad_personas")),
+                _formatear_valor(fila.get("hora_fin")),
                 _formatear_valor(fila.get("estado")),
             ])
         except Exception:
@@ -127,9 +135,9 @@ def limpiar_reservas(filas: list[dict]) -> list[list]:
 # ─── Dispatcher público ───────────────────────────────────────────────────────
 
 LIMPIADORES = {
-    "reporte_inventario_bajo":    limpiar_inventario,
-    "reporte_asistencia_diaria":  limpiar_asistencia,
-    "reporte_reservas_hoy":       limpiar_reservas,
+    "reporte_inventario_bajo":      limpiar_inventario,
+    "reporte_asistencia_diaria":    limpiar_asistencia,
+    "reporte_reservas_hoy":         limpiar_reservas,
 }
 
 

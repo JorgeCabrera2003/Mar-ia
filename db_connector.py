@@ -9,6 +9,7 @@ excepciones hacia la capa de FastAPI.
 import os
 import pymysql
 import pymysql.cursors
+from datetime import date
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -65,22 +66,34 @@ class SICGOVConnector:
 
     # ─── Intención: reporte_inventario_bajo ───────────────────────────────────
 
-    def get_alertas_inventario(self) -> list[dict]:
+    def get_alertas_inventario(self, params=None) -> list[dict]:
         """
         Retorna insumos cuyo stock actual está por debajo del stock mínimo.
-        Fuente: vista vw_alertas_inventario en goobv-sistema.
+        Acepta params.limite para restringir cantidad de resultados.
         """
-        sql = "SELECT * FROM vw_alertas_inventario ORDER BY stock_actual ASC"
+        limite = params.limite if params and params.limite else 50
+        sql = f"SELECT * FROM vw_alertas_inventario ORDER BY stock_actual ASC LIMIT {int(limite)}"
         return self._ejecutar_query(self._DB_SIS, sql)
 
     # ─── Intención: reporte_asistencia_diaria ────────────────────────────────
 
-    def get_asistencia_diaria(self) -> list[dict]:
+    def get_asistencia_diaria(self, params=None) -> list[dict]:
         """
-        Retorna los registros de asistencia del día actual.
-        Une asistencia con empleado y persona para mostrar nombres.
+        Retorna registros de asistencia.
+        Acepta params.fecha (un día) o params.fecha_inicio/fin (rango).
         """
-        sql = """
+        if params and params.es_rango:
+            inicio, fin = params.rango_sql()
+            cond = f"DATE(a.fecha) BETWEEN '{inicio}' AND '{fin}'"
+        else:
+            fecha = params.fecha_sql() if params else date.today().isoformat()
+            cond  = f"DATE(a.fecha) = '{fecha}'"
+
+        estado_cond = ""
+        if params and params.estado:
+            estado_cond = f"AND a.estado = '{params.estado}'"
+
+        sql = f"""
             SELECT
                 CONCAT(p.nombre, ' ', p.apellido)   AS empleado,
                 a.tipo_marcacion,
@@ -91,52 +104,92 @@ class SICGOVConnector:
             INNER JOIN empleado  e ON e.cedula = a.cedula
             INNER JOIN persona   p ON p.cedula = e.cedula
             LEFT  JOIN cargo     c ON c.id_cargo = e.id_cargo
-            WHERE DATE(a.fecha) = CURDATE()
+            WHERE {cond} {estado_cond}
             ORDER BY a.fecha DESC
         """
         return self._ejecutar_query(self._DB_SIS, sql)
 
     # ─── Intención: reporte_reservas_hoy ─────────────────────────────────────
 
-    def get_reservas_hoy(self) -> list[dict]:
+    def get_reservas_hoy(self, params=None) -> list[dict]:
         """
-        Retorna las reservaciones con fecha igual a hoy.
-        Incluye nombre del cliente, mesa y área.
+        Retorna reservaciones. Acepta:
+          - params.fecha          → un día específico
+          - params.fecha_inicio/fin → rango de fechas
+          - params.estado         → filtrar por estado
+          - params.limite         → máximo de resultados
         """
-        sql = """
+        if params and params.es_rango:
+            inicio, fin = params.rango_sql()
+            cond = f"DATE(r.fecha) BETWEEN '{inicio}' AND '{fin}'"
+        else:
+            fecha = params.fecha_sql() if params else date.today().isoformat()
+            cond  = f"DATE(r.fecha) = '{fecha}'"
+
+        estado_cond = ""
+        if params and params.estado:
+            estado_cond = f"AND r.estado = '{params.estado}'"
+
+        limite = params.limite if params and params.limite else 100
+
+        sql = f"""
             SELECT
-                CONCAT(p.nombre, ' ', p.apellido)   AS cliente,
+                CONCAT(p.nombre, ' ', p.apellido)    AS cliente,
                 r.fecha,
                 r.hora,
-                r.cantidad_personas,
+                r.hora_fin,
                 r.estado,
-                m.numero_mesa,
-                a.nombre                            AS area
+                IFNULL(m.numero_mesa, '—')            AS numero_mesa,
+                IFNULL(a.nombre, '—')                 AS area
             FROM reservacion r
-            INNER JOIN cliente   cl ON cl.cedula     = r.cedula
-            INNER JOIN persona   p  ON p.cedula      = cl.cedula
+            INNER JOIN cliente        cl ON cl.cedula         = r.cedula_cliente
+            INNER JOIN persona        p  ON p.cedula          = cl.cedula
             LEFT  JOIN asignacion_mesa am ON am.id_reservacion = r.id_reservacion
-            LEFT  JOIN mesa      m  ON m.id_mesa     = am.id_mesa
-            LEFT  JOIN area_mesa a  ON a.id_area     = m.id_area
-            WHERE DATE(r.fecha) = CURDATE()
-            ORDER BY r.hora ASC
+            LEFT  JOIN mesa            m  ON m.id_mesa         = am.id_mesa
+            LEFT  JOIN area_mesa       a  ON a.id_area         = m.id_area
+            WHERE {cond} {estado_cond}
+            ORDER BY r.fecha ASC, r.hora ASC
+            LIMIT {int(limite)}
         """
         return self._ejecutar_query(self._DB_SIS, sql)
 
     # ─── Extras: directorio y pedidos pendientes (disponibles para el futuro) ─
 
-    def get_directorio_empleados(self) -> list[dict]:
+    def get_directorio_empleados(self, params=None) -> list[dict]:
         """Retorna el directorio completo de empleados activos."""
-        sql = "SELECT * FROM vw_directorio_empleados"
+        limite = params.limite if params and params.limite else 200
+        sql    = f"SELECT * FROM vw_directorio_empleados LIMIT {int(limite)}"
         return self._ejecutar_query(self._DB_SIS, sql)
 
-    def get_pedidos_pendientes(self) -> list[dict]:
+    def get_clientes(self, params=None) -> list[dict]:
+        """Retorna la lista de clientes registrados en el sistema."""
+        limite = params.limite if params and params.limite else 200
+        sql = f"""
+            SELECT
+                p.cedula,
+                CONCAT(p.nombre, ' ', p.apellido) AS nombre_completo,
+                p.telefono,
+                p.correo,
+                c.fecha_registro
+            FROM cliente c
+            INNER JOIN persona p ON p.cedula = c.cedula
+            ORDER BY p.apellido ASC
+            LIMIT {int(limite)}
+        """
+        return self._ejecutar_query(self._DB_SIS, sql)
+
+    def get_pedidos_pendientes(self, params=None) -> list[dict]:
         """Retorna pedidos con estado PENDIENTE o COCINANDO."""
-        sql = """
+        estado_cond = ""
+        if params and params.estado:
+            estado_cond = f"AND estado = '{params.estado}'"
+        limite = params.limite if params and params.limite else 50
+        sql = f"""
             SELECT id_pedido, tipo_pedido, estado, fecha_pedido
             FROM pedido
-            WHERE estado IN ('PENDIENTE', 'COCINANDO')
+            WHERE estado IN ('PENDIENTE', 'COCINANDO') {estado_cond}
             ORDER BY fecha_pedido ASC
+            LIMIT {int(limite)}
         """
         return self._ejecutar_query(self._DB_SIS, sql)
 

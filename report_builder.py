@@ -22,7 +22,19 @@ REPORTE_CONFIG: dict[str, dict] = {
     },
     "reporte_reservas_hoy": {
         "titulo":   "Reporte de Reservaciones del Día",
-        "columnas": ["Cliente", "Mesa", "Área", "Hora", "Personas", "Estado"],
+        "columnas": ["Cliente", "Mesa", "Área", "Hora Inicio", "Hora Fin", "Estado"],
+    },
+    "reporte_clientes": {
+        "titulo":   "Reporte de Clientes Registrados",
+        "columnas": ["Cédula", "Nombre Completo", "Teléfono", "Correo", "Fecha Registro"],
+    },
+    "reporte_empleados": {
+        "titulo":   "Directorio de Empleados Activos",
+        "columnas": [],
+    },
+    "reporte_pedidos_pendientes": {
+        "titulo":   "Reporte de Pedidos Pendientes",
+        "columnas": ["ID Pedido", "Tipo", "Estado", "Fecha"],
     },
 }
 
@@ -34,6 +46,7 @@ def construir_reporte(
     confianza:  float,
     datos_crudos: list[dict],
     cedula:     str = "Sistema",
+    periodo:    str = "",
 ) -> dict:
     """
     Construye el contrato JSON completo para ReportService.php.
@@ -58,8 +71,9 @@ def construir_reporte(
             "metadata":        {},
             "documento_config": {"columnas": [], "filas": []},
             "error": (
-                "No entendí tu consulta. Intenta con: "
-                "'inventario bajo', 'asistencia de hoy' o 'reservas de hoy'."
+                "No entendí tu consulta. Prueba con: "
+                "'inventario bajo', 'asistencia de hoy', 'reservas de hoy', "
+                "'lista de clientes', 'empleados' o 'pedidos pendientes'."
             ),
         }
 
@@ -82,6 +96,7 @@ def construir_reporte(
             "fecha":         ahora.strftime("%d/%m/%Y"),
             "hora":          ahora.strftime("%I:%M %p"),
             "usuario":       cedula,
+            "periodo":       periodo or ahora.strftime("%d/%m/%Y"),
             "total_filas":   len(filas_limpias),
         },
         "documento_config": {
