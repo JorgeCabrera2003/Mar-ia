@@ -207,15 +207,28 @@ def _extraer_precio_max(texto: str) -> float | None:
     return None
 
 def _extraer_categoria_prod(texto: str) -> str | None:
-    categorias = [
-        "postre", "barra", "cocina", "retail", "bebida", 
-        "perros calientes", "hamburguesa", "taco", "pepito", 
-        "entrada", "mexicanisimo", "pizzas"
-    ]
-    for cat in categorias:
-        if cat in texto.lower():
-            if cat == "bebida": return "BARRA"
-            return cat.upper()
+    categorias_map = {
+        "postre": "POSTRE",
+        "barra": "BARRA",
+        "bebida": "BARRA",
+        "cocina": "COCINA",
+        "retail": "RETAIL",
+        "perros calientes": "PERROS CALIENTES",
+        "hamburguesa": "HAMBURGUESA",
+        "taco": "TACO",
+        "pepito": "PEPITO",
+        "entrada": "ENTRADA",
+        "mexicanisimo": "MEXICANISIMO",
+        "mexicana": "MEXICANISIMO",
+        "mexicano": "MEXICANISIMO",
+        "pizza": "PIZZA",
+        "maracucha": "MARACAIBO",
+        "maracaibo": "MARACAIBO"
+    }
+    texto_lower = texto.lower()
+    for palabra, cat_db in categorias_map.items():
+        if palabra in texto_lower:
+            return cat_db
     return None
 
 def _extraer_ingrediente(texto: str) -> str | None:
