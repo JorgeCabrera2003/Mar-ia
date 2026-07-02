@@ -19,7 +19,8 @@ from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Header, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -65,6 +66,16 @@ app = FastAPI(
     docs_url    = "/docs",
     redoc_url   = "/redoc",
 )
+
+# ─── Archivos estáticos (Chat UI) ────────────────────────────────────────────
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Redirige la raíz al chat UI."""
+    return RedirectResponse(url="/static/index.html")
 
 
 # ─── CORS — Acepta cualquier origen localhost (XAMPP, Laragon, PHP built-in) ──
