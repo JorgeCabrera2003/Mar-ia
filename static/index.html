@@ -46,15 +46,15 @@
 
   <!-- ── Suggestion Chips ───────────────────────────────── -->
   <nav class="chips-bar" aria-label="Consultas rápidas">
-    <button class="chip" onclick="sendChip('dame el inventario bajo')">📦 Inventario bajo</button>
-    <button class="chip" onclick="sendChip('asistencia de hoy')">📋 Asistencia hoy</button>
-    <button class="chip" onclick="sendChip('reservas de hoy')">📅 Reservas hoy</button>
-    <button class="chip" onclick="sendChip('stock crítico de insumos')">⚠️ Stock crítico</button>
-    <button class="chip" onclick="sendChip('cuántos clientes hay registrados')">👥 Clientes</button>
-    <button class="chip" onclick="sendChip('directorio de empleados')">🧑‍💼 Empleados</button>
-    <button class="chip" onclick="sendChip('pedidos pendientes')">🍽️ Pedidos</button>
-    <button class="chip" onclick="sendChip('reservas de ayer')">⏪ Ayer</button>
-    <button class="chip" onclick="sendChip('reservas de esta semana')">📆 Esta semana</button>
+    <button class="chip" onclick="sendChip('dame el inventario bajo')">Inventario bajo</button>
+    <button class="chip" onclick="sendChip('asistencia de hoy')">Asistencia hoy</button>
+    <button class="chip" onclick="sendChip('reservas de hoy')">Reservas hoy</button>
+    <button class="chip" onclick="sendChip('stock crítico de insumos')">Stock crítico</button>
+    <button class="chip" onclick="sendChip('cuántos clientes hay registrados')">Clientes</button>
+    <button class="chip" onclick="sendChip('directorio de empleados')">Empleados</button>
+    <button class="chip" onclick="sendChip('pedidos pendientes')">Pedidos</button>
+    <button class="chip" onclick="sendChip('reservas de ayer')">Ayer</button>
+    <button class="chip" onclick="sendChip('reservas de esta semana')">Esta semana</button>
   </nav>
 
   <!-- ── Chat Area ──────────────────────────────────────── -->
@@ -70,17 +70,17 @@
       <div class="welcome__avatar" aria-hidden="true">
         <img src="/static/maria.png" alt=""/>
       </div>
-      <h1 class="welcome__title">¡Hola! Soy Mar-ia 👋</h1>
+      <h1 class="welcome__title">¡Hola! Soy Mar-ia</h1>
       <p class="welcome__desc">
         Tu asistente de inteligencia artificial para <strong>SICGOV</strong>.<br/>
         Puedo consultar reportes de inventario, asistencia, reservaciones,
         clientes, empleados y pedidos — por fecha, rango o estado.
       </p>
       <div class="welcome__chips" role="list">
-        <button class="welcome__chip" role="listitem" onclick="sendChip('dame el inventario bajo')">📦 Inventario bajo</button>
-        <button class="welcome__chip" role="listitem" onclick="sendChip('reservas de hoy')">📅 Reservas de hoy</button>
-        <button class="welcome__chip" role="listitem" onclick="sendChip('asistencia de hoy')">📋 Asistencia de hoy</button>
-        <button class="welcome__chip" role="listitem" onclick="sendChip('pedidos pendientes')">🍽️ Pedidos pendientes</button>
+        <button class="welcome__chip" role="listitem" onclick="sendChip('dame el inventario bajo')">Inventario bajo</button>
+        <button class="welcome__chip" role="listitem" onclick="sendChip('reservas de hoy')">Reservas de hoy</button>
+        <button class="welcome__chip" role="listitem" onclick="sendChip('asistencia de hoy')">Asistencia de hoy</button>
+        <button class="welcome__chip" role="listitem" onclick="sendChip('pedidos pendientes')">Pedidos pendientes</button>
       </div>
     </div>
   </section>
@@ -229,7 +229,7 @@ function hideWelcome() {
 function appendUserBubble(text) {
   chatArea().insertAdjacentHTML('beforeend', `
     <div class="msg msg--user">
-      <div class="msg__avatar msg__avatar--user" aria-hidden="true">👤</div>
+      <div class="msg__avatar msg__avatar--user" aria-hidden="true">Yo</div>
       <div class="bubble bubble--user">
         ${escHtml(text)}
         <div class="bubble__time">${timestamp()}</div>
@@ -243,14 +243,14 @@ function appendMariaBubble(data) {
 
   if (data.error) {
     inner = `
-      <div class="intent-badge intent-badge--warn">⚠️ No reconocida</div>
+      <div class="intent-badge intent-badge--warn">No reconocida</div>
       <p>${escHtml(data.error)}</p>`;
   } else {
     const conf   = Math.round((data.confianza || 0) * 100);
     const cls    = conf >= 75 ? 'ok' : 'warn';
     const titulo = data.metadata?.titulo || data.intencion || '—';
 
-    inner = `<div class="intent-badge intent-badge--${cls}">✅ ${escHtml(titulo)}</div>`;
+    inner = `<div class="intent-badge intent-badge--${cls}">${escHtml(titulo)}</div>`;
 
     inner += `
       <div class="confidence">
@@ -283,7 +283,7 @@ function appendMariaBubble(data) {
     if (data.metadata?.periodo) {
       inner += `
         <div class="report-footer">
-          📅 <strong>${escHtml(data.metadata.periodo)}</strong>
+          <strong>${escHtml(data.metadata.periodo)}</strong>
           &nbsp;·&nbsp; ${escHtml(data.metadata.hora)}
           &nbsp;·&nbsp; ${data.metadata.total_filas} registros
         </div>`;
@@ -310,7 +310,7 @@ function appendErrorBubble(text) {
         <img src="/static/maria.png" alt="Mar-ia"/>
       </div>
       <div class="bubble bubble--maria">
-        <div class="intent-badge intent-badge--error">❌ Error de conexión</div>
+        <div class="intent-badge intent-badge--error">Error de conexión</div>
         <p>${escHtml(text)}</p>
       </div>
     </div>`);

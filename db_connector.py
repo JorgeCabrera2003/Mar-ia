@@ -20,9 +20,9 @@ class SICGOVConnector:
 
     # ─── Configuración desde .env ─────────────────────────────────────────────
     _HOST     = os.getenv("DB_HOST", "127.0.0.1")
-    _PORT     = int(os.getenv("DB_PORT", 8086))
+    _PORT     = int(os.getenv("DB_PORT", 3306))
     _USER     = os.getenv("DB_USER", "root")
-    _PASS     = os.getenv("DB_PASS", "rootpassword")
+    _PASS     = os.getenv("DB_PASS", "")
     _DB_SIS   = os.getenv("DB_NAME_SYSTEM", "goobv-sistema")
     _DB_SEC   = os.getenv("DB_NAME_SECURITY", "goobv-usuarios")
 

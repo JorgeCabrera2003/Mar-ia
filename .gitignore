@@ -8,3 +8,4 @@ models/*.pkl
 dist/
 build/
 .DS_Store
+venv312/

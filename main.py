@@ -49,10 +49,10 @@ connector = SICGOVConnector()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Inicialización y limpieza al arrancar/detener el servidor."""
-    print("\n╔══════════════════════════════════════════╗")
-    print("║   Mar-ia — Microservicio IA · SICGOV    ║")
-    print(f"║   Puerto : {PORT:<5}  Modelo : {'✅' if engine.esta_listo else '❌ Sin entrenar'}          ║")
-    print("╚══════════════════════════════════════════╝\n")
+    print("\n--------------------------------------------")
+    print("   Mar-ia -- Microservicio IA . SICGOV    ")
+    print(f"   Puerto : {PORT:<5}  Modelo : {'OK' if engine.esta_listo else 'Sin entrenar'}          ")
+    print("--------------------------------------------\n")
     yield
     print("\n[Mar-ia] Servicio detenido.")
 

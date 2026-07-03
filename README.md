@@ -1,4 +1,4 @@
-# Mar-ia — Microservicio IA para SICGOV
+# Mar-ia — Microservicio IA para SICGOV (v2.0)
 
 **Mar-ia** es un agente inteligente basado en SVM que clasifica intenciones del usuario y orquesta la generación de reportes PDF para el sistema SICGOV.
 
@@ -10,6 +10,18 @@
 | Motor ML | Scikit-Learn (TF-IDF + LinearSVC calibrado) |
 | Base de Datos | PyMySQL → goobv-sistema / goobv-usuarios |
 | Serialización | Joblib (.pkl) |
+
+---
+
+## Novedades y Mejoras de la IA (v2.0)
+
+Mar-ia ha sido mejorada significativamente para comprender el lenguaje natural de forma avanzada mediante el módulo `param_extractor.py`:
+
+- **Extracción Temporal:** Entiende "reservas de hoy", "la semana pasada", "el mes anterior", "hace 3 días", etc.
+- **Reconocimiento de Personas:** Extrae automáticamente nombres propios, cédulas (V-12345678), correos electrónicos y teléfonos.
+- **Filtros Dinámicos:** Entiende estados ("pendiente", "confirmada", "presente") y límites numéricos ("los últimos 5").
+- **Contexto de Restaurante/Menú:** Identifica categorías de productos, ingredientes y preferencias ("con pollo", "con extras", precio máximo).
+- **Consultas SQL Dinámicas:** Transforma las intenciones del usuario en filtros SQL precisos sin intervención manual.
 
 ---
 
@@ -28,9 +40,14 @@ venv/bin/pip install -r requirements.txt
 # Entrenar el modelo (genera models/mar_ia_model.pkl)
 venv/bin/python entrenamiento.py
 
-# Iniciar el servidor
+# Iniciar el servidor (Linux/Mac)
 venv/bin/uvicorn main:app --host 0.0.0.0 --port 8090 --reload
 ```
+
+### Iniciar fácilmente en Windows
+Hemos incluido un script para iniciar la IA con doble clic en Windows:
+1. Ejecuta el archivo `iniciar_ia.bat`.
+2. El script activará el entorno virtual y levantará el servidor automáticamente en el puerto 8090.
 
 ---
 
