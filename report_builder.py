@@ -13,7 +13,7 @@ from data_cleaner import limpiar_datos
 
 REPORTE_CONFIG: dict[str, dict] = {
     "reporte_inventario_bajo": {
-        "titulo":   "Reporte de Inventario Bajo",
+        "titulo":   "Reporte de Inventario General",
         "columnas": ["Insumo", "Stock Actual", "Stock Mínimo", "Unidad", "Estado"],
     },
     "reporte_asistencia_diaria": {
@@ -78,11 +78,7 @@ def construir_reporte(
             "confianza":       round(confianza, 4),
             "metadata":        {},
             "documento_config": {"columnas": [], "filas": []},
-            "error": (
-                "No entendí tu consulta. Prueba con: "
-                "'inventario bajo', 'asistencia de hoy', 'reservas de hoy', "
-                "'lista de clientes', 'empleados' o 'pedidos pendientes'."
-            ),
+            "error": "Lo siento, no te entendi bien, puedes volver a enviar tu mensaje",
         }
 
     # ── Recuperar config de columnas y título ─────────────────────────────────

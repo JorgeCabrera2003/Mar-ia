@@ -241,7 +241,11 @@ function appendUserBubble(text) {
 function appendMariaBubble(data) {
   let inner = '';
 
-  if (data.error) {
+  if (data.intencion === 'saludo') {
+    inner = `
+      <div class="intent-badge intent-badge--ok">Saludo</div>
+      <p style="margin-top: 8px;">¡Hola! Qué gusto saludarte. Soy Mar-ia, tu asistente virtual. ¿En qué te puedo ayudar hoy con SICGOV?</p>`;
+  } else if (data.error) {
     inner = `
       <div class="intent-badge intent-badge--warn">No reconocida</div>
       <p>${escHtml(data.error)}</p>`;

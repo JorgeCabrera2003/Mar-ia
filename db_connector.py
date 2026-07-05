@@ -71,11 +71,24 @@ class SICGOVConnector:
 
     def get_alertas_inventario(self, params=None) -> list[dict]:
         """
-        Retorna insumos cuyo stock actual está por debajo del stock mínimo.
+        Retorna todos los insumos del inventario, ordenados por nivel crítico.
         Acepta params.limite para restringir cantidad de resultados.
         """
         limite = params.limite if params and params.limite else 50
-        sql = f"SELECT * FROM vw_alertas_inventario ORDER BY stock_actual ASC LIMIT {int(limite)}"
+        sql = f"""
+            SELECT 
+                i.id_insumo, 
+                i.nombre_insumo AS nombre, 
+                c.nombre AS categoria, 
+                i.stock_actual, 
+                i.stock_minimo, 
+                um.nombre AS unidad_medida 
+            FROM insumo i 
+            JOIN categoria_insumo c ON i.id_categoria = c.id_categoria 
+            JOIN unidad_medida um ON i.id_unidad_medida = um.id_unidad 
+            ORDER BY (i.stock_actual / NULLIF(i.stock_minimo, 1)) ASC, i.stock_actual ASC 
+            LIMIT {int(limite)}
+        """
         return self._ejecutar_query(self._DB_SIS, sql)
 
     # ─── Intención: reporte_asistencia_diaria ────────────────────────────────

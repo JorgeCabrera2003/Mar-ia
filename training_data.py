@@ -216,6 +216,22 @@ TRAINING_DATA: dict[str, list[str]] = {
         "listado de postres",
         "ver el listado de comida",
     ],
+
+    "saludo": [
+        "hola",
+        "hola como estas",
+        "buenos dias",
+        "buenas tardes",
+        "buenas noches",
+        "saludos",
+        "que tal",
+        "como estas",
+        "hey",
+        "holi",
+        "buenas",
+        "hola mar-ia",
+        "epale",
+    ],
 }
 
 

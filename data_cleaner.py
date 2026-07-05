@@ -7,6 +7,7 @@ inesperado, sustituye con un valor seguro por defecto.
 """
 
 from datetime import datetime, date, timedelta
+import re
 
 
 # ─── Formateadores individuales ───────────────────────────────────────────────
@@ -18,7 +19,7 @@ def _formatear_valor(valor) -> str:
     - timedelta      → hora en formato 12h (TIME de MySQL)
     - datetime       → "DD/MM/YYYY HH:MM AM/PM"
     - date           → "DD/MM/YYYY"
-    - float          → 2 decimales
+    - float/decimal  → sin ceros redundantes
     - resto          → str().strip()
     """
     try:
@@ -35,9 +36,15 @@ def _formatear_valor(valor) -> str:
             return valor.strftime("%d/%m/%Y %I:%M %p")
         if isinstance(valor, date):
             return valor.strftime("%d/%m/%Y")
+            
         if isinstance(valor, float):
-            return f"{valor:.2f}"
-        cadena = str(valor).strip()
+            cadena = f"{valor:.4f}"
+        else:
+            cadena = str(valor).strip()
+            
+        if '.' in cadena and re.match(r'^-?\d+\.\d+$', cadena):
+            cadena = cadena.rstrip('0').rstrip('.')
+            
         return cadena if cadena != "" else "—"
     except Exception:
         return "—"
@@ -76,7 +83,7 @@ def limpiar_inventario(filas: list[dict]) -> list[list]:
                 _formatear_valor(fila.get("nombre_insumo") or fila.get("nombre")),
                 _formatear_valor(fila.get("stock_actual")),
                 _formatear_valor(fila.get("stock_minimo")),
-                _formatear_valor(fila.get("unidad") or fila.get("simbolo")),
+                _formatear_valor(fila.get("unidad_medida") or fila.get("unidad") or fila.get("simbolo")),
                 estado,
             ])
         except Exception:

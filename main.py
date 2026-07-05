@@ -112,6 +112,7 @@ INTENT_DISPATCHER: dict = {
     "reporte_pedidos_pendientes":   lambda p: connector.get_pedidos_pendientes(p),
     "buscar_persona":               lambda p: connector.buscar_persona(p),
     "reporte_platillos":            lambda p: connector.get_platillos(p),
+    "saludo":                       lambda p: [],
 }
 
 
@@ -252,3 +253,5 @@ if __name__ == "__main__":
         reload  = True,
         log_level = "info",
     )
+    
+# reload trigger
